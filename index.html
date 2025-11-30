@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>AR Interaction Lab (NFT Tiger)</title>
+  <title>AR Interaction Lab (NFT Grass)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 
   <!-- A-Frame -->
@@ -163,7 +163,7 @@
           }
         });
         this.el.addEventListener('random-color', ()=> {
-          const colors = ['#4CC3D9','#FFC65D','#7BC8A4','#EF2D5E','#FFFFFF'];
+          const colors = ['#4CC3D9','#7BC8A4','#FFC65D','#EF2D5E','#FFFFFF'];
           const c = colors[Math.floor(Math.random()*colors.length)];
           this.el.setAttribute('material','color',c);
         });
@@ -182,31 +182,31 @@
 </div>
 
 <a-scene
-        embedded
-        renderer="colorManagement: true; physicallyCorrectLights: true"
-        xr-mode-ui="enabled: false"
-        arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;">
+  embedded
+  renderer="colorManagement: true; physicallyCorrectLights: true"
+  xr-mode-ui="enabled: false"
+  arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;">
 
   <a-entity id="ray" cursor="rayOrigin: mouse" raycaster="objects: .raytarget"></a-entity>
 
   <a-entity light="type: ambient; intensity: 0.8"></a-entity>
   <a-entity light="type: directional; intensity: 0.6" position="0 1 1"></a-entity>
 
-  <!-- TIGER NFT MARKER -->
+  <!-- GRASS NFT MARKER (FIRST IN FOOD CHAIN) -->
   <a-nft
-          type="nft"
-          url="tiger"
-          id="tigerMarker"
-          smooth="true"
-          smoothCount="10"
-          smoothTolerance="0.01"
-          smoothThreshold="5">
+    type="nft"
+    url="GRASS"              <!-- base name of GRASS.iset / GRASS.fset / GRASS.fset3 -->
+    id="grassMarker"
+    smooth="true"
+    smoothCount="10"
+    smoothTolerance="0.01"
+    smoothThreshold="5">
 
     <a-plane id="dragplane" class="raytarget"
              position="0 0 0" rotation="-90 0 0" width="2" height="2"
              material="color: #000; opacity: 0; transparent: true"></a-plane>
 
-    <!-- UPDATED CUBE POSITION + SCALE -->
+    <!-- cube representing the “energy” or object on grass -->
     <a-box id="cube" class="raytarget"
            position="23 -14 8"
            width="2" height="2" depth="2"
