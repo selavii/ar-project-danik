@@ -13,17 +13,52 @@
 
   <style>
     body { margin:0; overflow:hidden; }
+
     .hud {
-      position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%);
-      display: grid; grid-template-columns: repeat(5, auto); gap: 8px;
+      position: fixed;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: grid;
+      grid-template-columns: repeat(5, auto);
+      gap: 8px;
       font: 600 14px/1 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      z-index: 10; pointer-events: none;
+      z-index: 10;
+      pointer-events: none;
     }
     .hud.hidden { display: none; }
     .hud button {
       pointer-events: auto;
-      padding: 10px 12px; border: 0; border-radius: 10px;
+      padding: 10px 12px;
+      border: 0;
+      border-radius: 10px;
       background: rgba(255,255,255,.9);
+    }
+
+    /* Popup message styling + animation */
+    #message {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translate(-50%, -10px);
+      padding: 12px 20px;
+      background: rgba(0,0,0,0.75);
+      color: white;
+      font-size: 20px;
+      font-weight: 700;
+      border-radius: 10px;
+      z-index: 20;
+
+      opacity: 0;
+      pointer-events: none;
+      transition:
+        opacity 0.3s ease,
+        transform 0.3s ease;
+    }
+
+    #message.visible {
+      opacity: 1;
+      transform: translate(-50%, 0);
     }
   </style>
 
@@ -183,21 +218,8 @@
 
 <body>
 
-<!-- 🎉 Message banner -->
-<div id="message" style="
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 12px 20px;
-  background: rgba(0,0,0,0.75);
-  color: white;
-  font-size: 20px;
-  font-weight: 700;
-  border-radius: 10px;
-  display: none;
-  z-index: 20;
-">
+<!-- 🎉 Message banner (animated via CSS) -->
+<div id="message">
   🎉 Congratulations! You guessed it right!
 </div>
 
@@ -407,12 +429,15 @@
   cubeGrass.addEventListener('doubletap', () => cubeGrass.emit('random-color'));
   cubeGrass.addEventListener('longpress', () => hud.classList.toggle('hidden'));
 
-  // -------- helper to show top banner --------
+  // -------- helper to show animated top banner --------
+  let messageTimeout = null;
   function showMessage(text) {
     message.textContent = text;
-    message.style.display = 'block';
-    setTimeout(() => {
-      message.style.display = 'none';
+    message.classList.add('visible');
+
+    if (messageTimeout) clearTimeout(messageTimeout);
+    messageTimeout = setTimeout(() => {
+      message.classList.remove('visible');
     }, 3000);
   }
 
