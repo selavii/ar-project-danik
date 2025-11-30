@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>AR Food Chain – Grass → Grasshopper → Frog</title>
+  <title>AR Food Chain – Grass → Grasshopper → Frog → Snake → Eagle</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 
   <!-- A-Frame -->
@@ -302,6 +302,62 @@
     </a-entity>
   </a-nft>
 
+  <!-- 4) SNAKE NFT MARKER -->
+  <a-nft
+    type="nft"
+    url="SNAKE"
+    id="snakeMarker"
+    smooth="true"
+    smoothCount="10"
+    smoothTolerance="0.01"
+    smoothThreshold="5">
+
+    <a-entity id="snakeGroup">
+
+      <a-plane id="dragplaneSnake" class="raytarget"
+               position="0 0 0" rotation="-90 0 0" width="2" height="2"
+               material="color: #000; opacity: 0; transparent: true"></a-plane>
+
+      <a-box id="cubeSnake" class="raytarget"
+             position="0 0.25 0"
+             width="1.5" height="1.5" depth="1.5"
+             material="metalness:0.1; roughness:0.6; color:#EF2D5E"
+             tap-gestures spin-toggle
+             drag-on-plane="plane: #dragplaneSnake; yOffset: 0.25; radius: 1.2"
+             pinch-scale twist-rotate>
+      </a-box>
+
+    </a-entity>
+  </a-nft>
+
+  <!-- 5) EAGLE NFT MARKER -->
+  <a-nft
+    type="nft"
+    url="EAGLE"
+    id="eagleMarker"
+    smooth="true"
+    smoothCount="10"
+    smoothTolerance="0.01"
+    smoothThreshold="5">
+
+    <a-entity id="eagleGroup">
+
+      <a-plane id="dragplaneEagle" class="raytarget"
+               position="0 0 0" rotation="-90 0 0" width="2" height="2"
+               material="color: #000; opacity: 0; transparent: true"></a-plane>
+
+      <a-box id="cubeEagle" class="raytarget"
+             position="0 0.25 0"
+             width="1.5" height="1.5" depth="1.5"
+             material="metalness:0.1; roughness:0.6; color:#FFFFFF"
+             tap-gestures spin-toggle
+             drag-on-plane="plane: #dragplaneEagle; yOffset: 0.25; radius: 1.2"
+             pinch-scale twist-rotate>
+      </a-box>
+
+    </a-entity>
+  </a-nft>
+
   <a-entity camera></a-entity>
 </a-scene>
 
@@ -314,9 +370,13 @@
   const grassMarker       = document.getElementById('grassMarker');
   const grasshopperMarker = document.getElementById('grasshopperMarker');
   const frogMarker        = document.getElementById('frogMarker');
+  const snakeMarker       = document.getElementById('snakeMarker');
+  const eagleMarker       = document.getElementById('eagleMarker');
 
   const grasshopperGroup  = document.getElementById('grasshopperGroup');
   const frogGroup         = document.getElementById('frogGroup');
+  const snakeGroup        = document.getElementById('snakeGroup');
+  const eagleGroup        = document.getElementById('eagleGroup');
 
   // HUD controls Grass cube
   document.getElementById('btn-rot-l').addEventListener('click', () => nudgeRot(-15));
@@ -359,9 +419,13 @@
   // ----------------- UNLOCK LOGIC -----------------
   let grassSeen        = false;
   let grasshopperSeen  = false;
+  let frogSeen         = false;
+  let snakeSeen        = false;
 
   grasshopperGroup.setAttribute('visible', false);
   frogGroup.setAttribute('visible', false);
+  snakeGroup.setAttribute('visible', false);
+  eagleGroup.setAttribute('visible', false);
 
   // GRASS scanned
   grassMarker.addEventListener('markerFound', () => {
@@ -386,6 +450,7 @@
   // FROG scanned
   frogMarker.addEventListener('markerFound', () => {
     if (grasshopperSeen) {
+      frogSeen = true;
       frogGroup.setAttribute('visible', true);
       showMessage('🐸 The frog eats the grasshopper – next step in the food chain!');
     } else {
@@ -395,6 +460,35 @@
 
   frogMarker.addEventListener('markerLost', () => {
     frogGroup.setAttribute('visible', false);
+  });
+
+  // SNAKE scanned
+  snakeMarker.addEventListener('markerFound', () => {
+    if (frogSeen) {
+      snakeSeen = true;
+      snakeGroup.setAttribute('visible', true);
+      showMessage('🐍 The snake hunts the frog – the food chain continues!');
+    } else {
+      snakeGroup.setAttribute('visible', false);
+    }
+  });
+
+  snakeMarker.addEventListener('markerLost', () => {
+    snakeGroup.setAttribute('visible', false);
+  });
+
+  // EAGLE scanned
+  eagleMarker.addEventListener('markerFound', () => {
+    if (snakeSeen) {
+      eagleGroup.setAttribute('visible', true);
+      showMessage('🦅 The eagle is the top predator – the food chain is complete!');
+    } else {
+      eagleGroup.setAttribute('visible', false);
+    }
+  });
+
+  eagleMarker.addEventListener('markerLost', () => {
+    eagleGroup.setAttribute('visible', false);
   });
 </script>
 
