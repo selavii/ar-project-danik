@@ -28,6 +28,8 @@
       opacity: 0;
       transition: 0.35s ease;
       z-index: 30;
+      max-width: 90vw;
+      text-align: center;
     }
     .popup.show {
       opacity: 1;
@@ -66,14 +68,17 @@
 
     // ---- FOOD CHAIN PROGRESSION ----
     let currentStage = 0;
-    const order = ["grass","grasshopper","frog","snake","eagle"];
+    const order = ["GRASS","GRASSHOPPER","FROG","SNAKE","EAGLE"];
 
     function foundMarker(name){
-      if(name === order[currentStage]){
-        showPopup("Correct! → " + name.toUpperCase(), true);
+      if (name === order[currentStage]) {
+        showPopup("Correct! → " + name, true);
         currentStage++;
+        if (currentStage >= order.length) {
+          currentStage = order.length - 1; // stay at end
+        }
       } else {
-        showPopup("Wrong order! Try again!", false);
+        showPopup("Wrong order! Follow GRASS → GRASSHOPPER → FROG → SNAKE → EAGLE", false);
       }
     }
 
@@ -176,10 +181,10 @@
 </div>
 
 <a-scene
-        embedded
-        renderer="colorManagement:true; physicallyCorrectLights:true"
-        xr-mode-ui="enabled:false"
-        arjs="sourceType:webcam; trackingMethod:best; debugUIEnabled:false;">
+  embedded
+  renderer="colorManagement:true; physicallyCorrectLights:true"
+  xr-mode-ui="enabled:false"
+  arjs="sourceType:webcam; trackingMethod:best; debugUIEnabled:false;">
 
   <a-entity id="ray" cursor="rayOrigin:mouse" raycaster="objects:.raytarget"></a-entity>
 
@@ -189,10 +194,13 @@
   <!-- =======================
        1) GRASS
   ======================== -->
-  <a-nft type="nft" url="grass" id="markerGrass"
+  <a-nft type="nft"
+         url="GRASS"
+         id="markerGrass"
+         emitevents="true"
          smooth="true" smoothCount="10" smoothTolerance="0.01" smoothThreshold="5">
     <a-entity id="grassModel"
-              gltf-model="url(models/grass)"
+              gltf-model="url(models/grass.glb)"
               scale="2 2 2"
               position="0 0 0"
               rotation="0 0 0"
@@ -204,8 +212,12 @@
   <!-- =======================
        2) GRASSHOPPER
   ======================== -->
-  <a-nft type="nft" url="grasshopper" id="markerGrasshopper">
-    <a-entity gltf-model="url(models/grasshopper)"
+  <a-nft type="nft"
+         url="GRASSHOPPER"
+         id="markerGrasshopper"
+         emitevents="true"
+         smooth="true" smoothCount="10">
+    <a-entity gltf-model="url(models/grasshopper.glb)"
               scale="1.6 1.6 1.6"
               position="0 0 0"
               rotation="0 180 0"
@@ -217,8 +229,12 @@
   <!-- =======================
        3) FROG
   ======================== -->
-  <a-nft type="nft" url="frog" id="markerFrog">
-    <a-entity gltf-model="url(models/frog)"
+  <a-nft type="nft"
+         url="FROG"
+         id="markerFrog"
+         emitevents="true"
+         smooth="true" smoothCount="10">
+    <a-entity gltf-model="url(models/frog.glb)"
               scale="2 2 2"
               rotation="0 0 0"
               class="raytarget"
@@ -229,8 +245,12 @@
   <!-- =======================
        4) SNAKE
   ======================== -->
-  <a-nft type="nft" url="snake" id="markerSnake">
-    <a-entity gltf-model="url(models/snake)"
+  <a-nft type="nft"
+         url="SNAKE"
+         id="markerSnake"
+         emitevents="true"
+         smooth="true" smoothCount="10">
+    <a-entity gltf-model="url(models/snake.glb)"
               scale="1.4 1.4 1.4"
               rotation="0 0 0"
               class="raytarget"
@@ -241,8 +261,12 @@
   <!-- =======================
        5) EAGLE
   ======================== -->
-  <a-nft type="nft" url="eagle" id="markerEagle">
-    <a-entity gltf-model="url(models/eagle)"
+  <a-nft type="nft"
+         url="EAGLE"
+         id="markerEagle"
+         emitevents="true"
+         smooth="true" smoothCount="10">
+    <a-entity gltf-model="url(models/eagle.glb)"
               scale="2.5 2.5 2.5"
               rotation="0 0 0"
               class="raytarget"
@@ -254,6 +278,7 @@
 </a-scene>
 
 <script>
+  // Attach markerFound to all NFT markers
   document.querySelectorAll("a-nft").forEach(marker => {
     marker.addEventListener("markerFound", () => {
       const id = marker.getAttribute("url");
