@@ -260,22 +260,24 @@
     </a-entity>
   </a-nft>
 
-  <!-- =======================
-       5) EAGLE
-  ======================== -->
-  <a-nft type="nft"
-         url="EAGLE"
-         id="markerEagle"
-         emitevents="true"
-         smooth="true" smoothCount="10">
-    <a-entity gltf-model="url(models/eagle.glb)"
-              scale="2.5 2.5 2.5"
-              position="0 0 0"
-              rotation="180 0 0"
-              class="raytarget"
-              tap-gestures pinch-scale twist-rotate>
-    </a-entity>
-  </a-nft>
+<!-- =======================
+     5) EAGLE
+======================== -->
+<a-nft type="nft"
+       url="EAGLE"
+       id="markerEagle"
+       emitevents="true"
+       smooth="true" smoothCount="10">
+
+  <a-entity gltf-model="url(models/eagle.glb)"
+            scale="2.5 2.5 2.5"
+            position="0 0 0"
+            rotation="90 0 0"
+            class="raytarget"
+            tap-gestures pinch-scale twist-rotate>
+  </a-entity>
+
+</a-nft>
 
   <a-entity camera></a-entity>
 </a-scene>
