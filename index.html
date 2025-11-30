@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>AR Interaction Lab (NFT Grass → Grasshopper)</title>
+  <title>AR Food Chain – Grass → Grasshopper</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 
   <!-- A-Frame -->
@@ -30,7 +30,6 @@
   <script>
     const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
-    /* ----------------------- TAP / DOUBLE TAP / LONG PRESS ----------------------- */
     AFRAME.registerComponent('tap-gestures', {
       schema: {longMs:{default:500}},
       init () {
@@ -51,9 +50,8 @@
       }
     });
 
-    /* ----------------------- DRAG ON PLANE ----------------------- */
     AFRAME.registerComponent('drag-on-plane', {
-      schema: { plane: {type: 'selector'}, yOffset: {default: 0.25}, radius: {default: 2} },
+      schema: { plane: {type: 'selector'}, yOffset: {default: 0.25}, radius: {default: 1.2} },
       init () {
         this.dragging = false;
         this.scene = this.el.sceneEl;
@@ -90,7 +88,6 @@
       }
     });
 
-    /* ----------------------- PINCH SCALE ----------------------- */
     AFRAME.registerComponent('pinch-scale', {
       schema: {min:{default:0.2}, max:{default:3}},
       init(){
@@ -124,7 +121,6 @@
       }
     });
 
-    /* ----------------------- TWIST ROTATE ----------------------- */
     AFRAME.registerComponent('twist-rotate', {
       schema:{degPerRad:{default:57.2958}},
       init(){
@@ -147,13 +143,12 @@
         const onEnd = ()=> this.active = false;
 
         window.addEventListener('touchstart', onStart, {passive:false});
-        window.addListener('touchmove',  onMove,  {passive:false});
+        window.addEventListener('touchmove',  onMove,  {passive:false});
         window.addEventListener('touchend',   onEnd);
         window.addEventListener('touchcancel',onEnd);
       }
     });
 
-    /* ----------------------- SPIN + RANDOM COLOR ----------------------- */
     AFRAME.registerComponent('spin-toggle', {
       schema:{speed:{default:4000}},
       init(){
@@ -162,14 +157,13 @@
           this.spinning = !this.spinning;
           if (this.spinning) {
             this.el.setAttribute('animation__spin',
-              `property: rotation; to: 0 360 0; loop: true; dur: ${this.data.speed}`);
+                    `property: rotation; to: 0 360 0; loop: true; dur: ${this.data.speed}`);
           } else {
             this.el.removeAttribute('animation__spin');
           }
         });
-
         this.el.addEventListener('random-color', ()=> {
-          const colors = ['#4CC3D9','#7BC8A4','#FFC65D','#EF2D5E','#FFFFFF'];
+          const colors = ['#4CC3D9','#7BC8A4','#FFC65D','#EF2D5E','#FFC65D','#FFFFFF'];
           const c = colors[Math.floor(Math.random()*colors.length)];
           this.el.setAttribute('material','color',c);
         });
@@ -198,7 +192,7 @@
   <a-entity light="type: ambient; intensity: 0.8"></a-entity>
   <a-entity light="type: directional; intensity: 0.6" position="0 1 1"></a-entity>
 
-  <!-- ================= GRASS NFT MARKER ================= -->
+  <!-- 1) GRASS NFT MARKER – first in chain -->
   <a-nft
     type="nft"
     url="GRASS"
@@ -208,45 +202,50 @@
     smoothTolerance="0.01"
     smoothThreshold="5">
 
-    <!-- Invisible plane for dragging interaction -->
-    <a-plane id="dragplane" class="raytarget"
+    <a-plane id="dragplaneGrass" class="raytarget"
              position="0 0 0" rotation="-90 0 0" width="2" height="2"
              material="color: #000; opacity: 0; transparent: true"></a-plane>
 
-    <!-- ================== STYLIZED GRASSHOPPER ================== -->
-    <a-entity id="grasshopper"
-              position="0 25 0"
-              rotation="0 0 0"
-              scale="18 18 18"
-              class="raytarget"
-              tap-gestures spin-toggle
-              pinch-scale twist-rotate
-              drag-on-plane="plane: #dragplane; yOffset: 0.25; radius: 2">
-
-      <!-- body -->
-      <a-cylinder height="0.20" radius="0.08"
-                  rotation="0 0 90"
-                  material="color:#43A047; metalness:0.1; roughness:0.5"></a-cylinder>
-
-      <!-- head -->
-      <a-sphere position="0.20 0 0"
-                radius="0.09"
-                material="color:#66BB6A; metalness:0.1; roughness:0.4"></a-sphere>
-
-      <!-- back leg left -->
-      <a-box position="-0.18 -0.08 0.05"
-             width="0.28" height="0.03" depth="0.03"
-             rotation="0 0 -25"
-             material="color:#2E7D32"></a-box>
-
-      <!-- back leg right -->
-      <a-box position="-0.18 -0.08 -0.05"
-             width="0.28" height="0.03" depth="0.03"
-             rotation="0 0 25"
-             material="color:#2E7D32"></a-box>
-    </a-entity>
+    <a-box id="cubeGrass" class="raytarget"
+           position="0 0.25 0"
+           width="1.5" height="1.5" depth="1.5"
+           material="metalness:0.1; roughness:0.6; color:#4CC3D9"
+           tap-gestures spin-toggle
+           drag-on-plane="plane: #dragplaneGrass; yOffset: 0.25; radius: 1.2"
+           pinch-scale twist-rotate>
+    </a-box>
 
     <a-cylinder radius="0.01" height="0.001" color="#888"></a-cylinder>
+  </a-nft>
+
+  <!-- 2) GRASSHOPPER NFT MARKER – unlocked only after GRASS seen -->
+  <a-nft
+    type="nft"
+    url="GRASSHOPPER"
+    id="grasshopperMarker"
+    smooth="true"
+    smoothCount="10"
+    smoothTolerance="0.01"
+    smoothThreshold="5">
+
+    <!-- wrap in a group so we can hide/show it -->
+    <a-entity id="grasshopperGroup">
+
+      <a-plane id="dragplaneGrasshopper" class="raytarget"
+               position="0 0 0" rotation="-90 0 0" width="2" height="2"
+               material="color: #000; opacity: 0; transparent: true"></a-plane>
+
+      <a-box id="cubeGrasshopper" class="raytarget"
+             position="0 0.25 0"
+             width="1.5" height="1.5" depth="1.5"
+             material="metalness:0.1; roughness:0.6; color:#7BC8A4"
+             tap-gestures spin-toggle
+             drag-on-plane="plane: #dragplaneGrasshopper; yOffset: 0.25; radius: 1.2"
+             pinch-scale twist-rotate>
+      </a-box>
+
+      <a-cylinder radius="0.01" height="0.001" color="#888"></a-cylinder>
+    </a-entity>
   </a-nft>
 
   <a-entity camera></a-entity>
@@ -254,33 +253,56 @@
 
 <script>
   const hud  = document.getElementById('hud');
-  const bug  = document.getElementById('grasshopper');
+  const cubeGrass = document.getElementById('cubeGrass');
 
+  // HUD still controls the GRASS cube (step 1)
   document.getElementById('btn-rot-l').addEventListener('click', () => nudgeRot(-15));
   document.getElementById('btn-rot-r').addEventListener('click', () => nudgeRot( 15));
-
   function nudgeRot(delta){
-    const r = bug.getAttribute('rotation');
-    bug.setAttribute('rotation', {x:r.x, y:r.y + delta, z:r.z});
+    const r = cubeGrass.getAttribute('rotation');
+    cubeGrass.setAttribute('rotation', {x:r.x, y:r.y + delta, z:r.z});
   }
 
   document.getElementById('btn-scale--').addEventListener('click', () => nudgeScale(0.9));
   document.getElementById('btn-scale-+').addEventListener('click', () => nudgeScale(1.1));
-
   function nudgeScale(mult){
-    const s = bug.getAttribute('scale');
-    bug.setAttribute('scale', {
+    const s = cubeGrass.getAttribute('scale');
+    cubeGrass.setAttribute('scale', {
       x: clamp(s.x * mult, 0.2, 3),
       y: clamp(s.y * mult, 0.2, 3),
       z: clamp(s.z * mult, 0.2, 3)
     });
   }
 
-  document.getElementById('btn-color').addEventListener('click', () => bug.emit('random-color'));
+  document.getElementById('btn-color').addEventListener('click', () => cubeGrass.emit('random-color'));
 
-  bug.addEventListener('tap',       () => bug.emit('toggle-spin'));
-  bug.addEventListener('doubletap', () => bug.emit('random-color'));
-  bug.addEventListener('longpress', () => hud.classList.toggle('hidden'));
+  cubeGrass.addEventListener('tap',       () => cubeGrass.emit('toggle-spin'));
+  cubeGrass.addEventListener('doubletap', () => cubeGrass.emit('random-color'));
+  cubeGrass.addEventListener('longpress', () => hud.classList.toggle('hidden'));
+
+  // --------- UNLOCK LOGIC: must scan GRASS before GRASSHOPPER shows ---------
+  const grassMarker = document.getElementById('grassMarker');
+  const grasshopperMarker = document.getElementById('grasshopperMarker');
+  const grasshopperGroup = document.getElementById('grasshopperGroup');
+
+  let grassSeen = false;
+  grasshopperGroup.setAttribute('visible', false);
+
+  grassMarker.addEventListener('markerFound', () => {
+    grassSeen = true;              // unlock next step of food chain
+  });
+
+  grasshopperMarker.addEventListener('markerFound', () => {
+    if (grassSeen) {
+      grasshopperGroup.setAttribute('visible', true);
+    } else {
+      grasshopperGroup.setAttribute('visible', false);
+    }
+  });
+
+  grasshopperMarker.addEventListener('markerLost', () => {
+    grasshopperGroup.setAttribute('visible', false);
+  });
 </script>
 </body>
 </html>
