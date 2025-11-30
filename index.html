@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>AR Food Chain – Grass → Grasshopper</title>
+  <title>AR Food Chain – Grass → Grasshopper → Frog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 
   <!-- A-Frame -->
@@ -183,7 +183,7 @@
 
 <body>
 
-<!-- 🎉 Congratulations banner -->
+<!-- 🎉 Message banner -->
 <div id="message" style="
   position: fixed;
   top: 20px;
@@ -274,18 +274,49 @@
     </a-entity>
   </a-nft>
 
+  <!-- 3) FROG NFT MARKER -->
+  <a-nft
+    type="nft"
+    url="FROG"
+    id="frogMarker"
+    smooth="true"
+    smoothCount="10"
+    smoothTolerance="0.01"
+    smoothThreshold="5">
+
+    <a-entity id="frogGroup">
+
+      <a-plane id="dragplaneFrog" class="raytarget"
+               position="0 0 0" rotation="-90 0 0" width="2" height="2"
+               material="color: #000; opacity: 0; transparent: true"></a-plane>
+
+      <a-box id="cubeFrog" class="raytarget"
+             position="0 0.25 0"
+             width="1.5" height="1.5" depth="1.5"
+             material="metalness:0.1; roughness:0.6; color:#FFC65D"
+             tap-gestures spin-toggle
+             drag-on-plane="plane: #dragplaneFrog; yOffset: 0.25; radius: 1.2"
+             pinch-scale twist-rotate>
+      </a-box>
+
+    </a-entity>
+  </a-nft>
+
   <a-entity camera></a-entity>
 </a-scene>
 
 <script>
-  const hud  = document.getElementById('hud');
-  const message = document.getElementById('message');
+  const hud      = document.getElementById('hud');
+  const message  = document.getElementById('message');
 
   const cubeGrass = document.getElementById('cubeGrass');
-  const grassMarker = document.getElementById('grassMarker');
 
+  const grassMarker       = document.getElementById('grassMarker');
   const grasshopperMarker = document.getElementById('grasshopperMarker');
+  const frogMarker        = document.getElementById('frogMarker');
+
   const grasshopperGroup  = document.getElementById('grasshopperGroup');
+  const frogGroup         = document.getElementById('frogGroup');
 
   // HUD controls Grass cube
   document.getElementById('btn-rot-l').addEventListener('click', () => nudgeRot(-15));
@@ -308,7 +339,7 @@
     });
   }
 
-  document.getElementById('btn-color').addEventListener('click', () => 
+  document.getElementById('btn-color').addEventListener('click', () =>
     cubeGrass.emit('random-color')
   );
 
@@ -316,26 +347,33 @@
   cubeGrass.addEventListener('doubletap', () => cubeGrass.emit('random-color'));
   cubeGrass.addEventListener('longpress', () => hud.classList.toggle('hidden'));
 
-  // ----------------- UNLOCK LOGIC + MESSAGE -----------------
-  let grassSeen = false;
-  grasshopperGroup.setAttribute('visible', false);
+  // -------- helper to show top banner --------
+  function showMessage(text) {
+    message.textContent = text;
+    message.style.display = 'block';
+    setTimeout(() => {
+      message.style.display = 'none';
+    }, 3000);
+  }
 
+  // ----------------- UNLOCK LOGIC -----------------
+  let grassSeen        = false;
+  let grasshopperSeen  = false;
+
+  grasshopperGroup.setAttribute('visible', false);
+  frogGroup.setAttribute('visible', false);
+
+  // GRASS scanned
   grassMarker.addEventListener('markerFound', () => {
     grassSeen = true;
   });
 
+  // GRASSHOPPER scanned
   grasshopperMarker.addEventListener('markerFound', () => {
     if (grassSeen) {
+      grasshopperSeen = true;
       grasshopperGroup.setAttribute('visible', true);
-
-      // SHOW MESSAGE
-      message.style.display = 'block';
-
-      // HIDE AFTER 3 SECONDS
-      setTimeout(() => {
-        message.style.display = 'none';
-      }, 3000);
-
+      showMessage('🎉 Congratulations! You guessed it right!');
     } else {
       grasshopperGroup.setAttribute('visible', false);
     }
@@ -343,6 +381,20 @@
 
   grasshopperMarker.addEventListener('markerLost', () => {
     grasshopperGroup.setAttribute('visible', false);
+  });
+
+  // FROG scanned
+  frogMarker.addEventListener('markerFound', () => {
+    if (grasshopperSeen) {
+      frogGroup.setAttribute('visible', true);
+      showMessage('🐸 The frog eats the grasshopper – next step in the food chain!');
+    } else {
+      frogGroup.setAttribute('visible', false);
+    }
+  });
+
+  frogMarker.addEventListener('markerLost', () => {
+    frogGroup.setAttribute('visible', false);
   });
 </script>
 
