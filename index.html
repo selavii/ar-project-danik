@@ -165,6 +165,55 @@
         window.addEventListener("touchend",onEnd);
       }
     });
+
+    // --- DRAG ON MARKER PLANE ---
+    AFRAME.registerComponent('drag-on-plane', {
+      schema: {
+        plane: {type: 'selector'},
+        yOffset: {default: 0.3},
+        radius: {default: 1.2}
+      },
+      init () {
+        this.dragging = false;
+        this.scene = this.el.sceneEl;
+        this.rayEl = document.querySelector('#ray');
+        // Start drag on mousedown / touchstart
+        this.el.addEventListener('mousedown', () => this.dragging = true);
+        this.el.addEventListener('touchstart', () => this.dragging = true);
+        // End drag
+        window.addEventListener('mouseup',   () => this.dragging = false);
+        window.addEventListener('touchend',  () => this.dragging = false);
+        window.addEventListener('touchcancel',  () => this.dragging = false);
+        // Move
+        this.scene.addEventListener('mousemove', () => this.updateDrag());
+        this.scene.addEventListener('touchmove', () => this.updateDrag());
+      },
+      updateDrag () {
+        if (!this.dragging) return;
+        const raycaster = this.rayEl.getObject3D('raycaster');
+        const planeMesh = this.data.plane.getObject3D('mesh');
+        if (!raycaster || !planeMesh) return;
+
+        planeMesh.updateMatrixWorld();
+        const normal = new THREE.Vector3(0,1,0)
+          .applyQuaternion(planeMesh.getWorldQuaternion(new THREE.Quaternion()));
+        const point  = planeMesh.getWorldPosition(new THREE.Vector3());
+        const plane  = new THREE.Plane().setFromNormalAndCoplanarPoint(normal, point);
+
+        const ray = raycaster.ray;
+        const hit = new THREE.Vector3();
+        if (ray.intersectPlane(plane, hit)) {
+          const local = this.el.parentEl.object3D.worldToLocal(hit.clone());
+          const r = Math.hypot(local.x, local.z);
+          const maxR = this.data.radius;
+          if (r > maxR){
+            const k = maxR / r;
+            local.x *= k; local.z *= k;
+          }
+          this.el.setAttribute('position', `${local.x} ${this.data.yOffset} ${local.z}`);
+        }
+      }
+    });
   </script>
 </head>
 
@@ -186,6 +235,7 @@
   xr-mode-ui="enabled:false"
   arjs="sourceType:webcam; trackingMethod:best; debugUIEnabled:false;">
 
+  <!-- Raycaster used by drag-on-plane -->
   <a-entity id="ray" cursor="rayOrigin:mouse" raycaster="objects:.raytarget"></a-entity>
 
   <a-entity light="type:ambient; intensity:0.8"></a-entity>
@@ -199,13 +249,23 @@
          id="markerGrass"
          emitevents="true"
          smooth="true" smoothCount="10" smoothTolerance="0.01" smoothThreshold="5">
+
+    <!-- invisible drag plane -->
+    <a-plane id="dragplaneGrass"
+             class="raytarget"
+             position="0 0 0"
+             rotation="-90 0 0"
+             width="2" height="2"
+             material="color:#000; opacity:0; transparent:true"></a-plane>
+
     <a-entity id="grassModel"
               gltf-model="url(models/grass.glb)"
               scale="3 3 3"
               position="0 0.3 0"
               rotation="0 0 0"
               class="raytarget"
-              tap-gestures pinch-scale twist-rotate>
+              tap-gestures pinch-scale twist-rotate
+              drag-on-plane="plane:#dragplaneGrass; yOffset:0.3; radius:1.2">
     </a-entity>
   </a-nft>
 
@@ -217,12 +277,21 @@
          id="markerGrasshopper"
          emitevents="true"
          smooth="true" smoothCount="10">
+
+    <a-plane id="dragplaneGrasshopper"
+             class="raytarget"
+             position="0 0 0"
+             rotation="-90 0 0"
+             width="2" height="2"
+             material="color:#000; opacity:0; transparent:true"></a-plane>
+
     <a-entity gltf-model="url(models/grasshopper.glb)"
               scale="1.6 1.6 1.6"
-              position="0 0 0"
+              position="0 0.3 0"
               rotation="0 180 0"
               class="raytarget"
-              tap-gestures pinch-scale twist-rotate>
+              tap-gestures pinch-scale twist-rotate
+              drag-on-plane="plane:#dragplaneGrasshopper; yOffset:0.3; radius:1.2">
     </a-entity>
   </a-nft>
 
@@ -234,12 +303,21 @@
          id="markerFrog"
          emitevents="true"
          smooth="true" smoothCount="10">
+
+    <a-plane id="dragplaneFrog"
+             class="raytarget"
+             position="0 0 0"
+             rotation="-90 0 0"
+             width="2" height="2"
+             material="color:#000; opacity:0; transparent:true"></a-plane>
+
     <a-entity gltf-model="url(models/frog.glb)"
               scale="2 2 2"
-              position="0 0 0"
+              position="0 0.3 0"
               rotation="180 0 0"
               class="raytarget"
-              tap-gestures pinch-scale twist-rotate>
+              tap-gestures pinch-scale twist-rotate
+              drag-on-plane="plane:#dragplaneFrog; yOffset:0.3; radius:1.2">
     </a-entity>
   </a-nft>
 
@@ -251,39 +329,55 @@
          id="markerSnake"
          emitevents="true"
          smooth="true" smoothCount="10">
+
+    <a-plane id="dragplaneSnake"
+             class="raytarget"
+             position="0 0 0"
+             rotation="-90 0 0"
+             width="2" height="2"
+             material="color:#000; opacity:0; transparent:true"></a-plane>
+
     <a-entity gltf-model="url(models/snake.glb)"
               scale="2.2 2.2 2.2"
               position="0 0.3 0"
               rotation="0 0 0"
               class="raytarget"
-              tap-gestures pinch-scale twist-rotate>
+              tap-gestures pinch-scale twist-rotate
+              drag-on-plane="plane:#dragplaneSnake; yOffset:0.3; radius:1.2">
     </a-entity>
   </a-nft>
 
-<!-- =======================
-     5) EAGLE
-======================== -->
-<a-nft type="nft"
-       url="EAGLE"
-       id="markerEagle"
-       emitevents="true"
-       smooth="true" smoothCount="10">
+  <!-- =======================
+       5) EAGLE
+  ======================== -->
+  <a-nft type="nft"
+         url="EAGLE"
+         id="markerEagle"
+         emitevents="true"
+         smooth="true" smoothCount="10">
 
-  <a-entity gltf-model="url(models/eagle.glb)"
-            scale="2.5 2.5 2.5"
-            position="0 0 0"
-            rotation="90 0 0"
-            class="raytarget"
-            tap-gestures pinch-scale twist-rotate>
-  </a-entity>
+    <a-plane id="dragplaneEagle"
+             class="raytarget"
+             position="0 0 0"
+             rotation="-90 0 0"
+             width="2" height="2"
+             material="color:#000; opacity:0; transparent:true"></a-plane>
 
-</a-nft>
+    <a-entity gltf-model="url(models/eagle.glb)"
+              scale="2.5 2.5 2.5"
+              position="0 0.3 0"
+              rotation="90 0 0"
+              class="raytarget"
+              tap-gestures pinch-scale twist-rotate
+              drag-on-plane="plane:#dragplaneEagle; yOffset:0.3; radius:1.2">
+    </a-entity>
+  </a-nft>
 
   <a-entity camera></a-entity>
 </a-scene>
 
 <script>
-  // Attach markerFound to all NFT markers
+  // attach markerFound to all NFT markers for food-chain logic
   document.querySelectorAll("a-nft").forEach(marker => {
     marker.addEventListener("markerFound", () => {
       const id = marker.getAttribute("url");
