@@ -42,9 +42,9 @@
       left: 50%;
       transform: translate(-50%, -10px);
       padding: 12px 20px;
-      background: rgba(0,0,0,0.75);
+      background: rgba(0,0,0,0.85);
       color: white;
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 700;
       border-radius: 10px;
       z-index: 20;
@@ -54,6 +54,8 @@
       transition:
         opacity 0.3s ease,
         transform 0.3s ease;
+      text-align: center;
+      max-width: 90vw;
     }
 
     #message.visible {
@@ -462,9 +464,10 @@
     if (grassSeen) {
       grasshopperSeen = true;
       grasshopperGroup.setAttribute('visible', true);
-      showMessage('🎉 Congratulations! You guessed it right!');
+      showMessage('🎉 Congratulations! You guessed it right! (Grass → Grasshopper)');
     } else {
       grasshopperGroup.setAttribute('visible', false);
+      showMessage('❌ Not yet! First find the GRASS – it is the base of the food chain.');
     }
   });
 
@@ -480,6 +483,7 @@
       showMessage('🐸 The frog eats the grasshopper – next step in the food chain!');
     } else {
       frogGroup.setAttribute('visible', false);
+      showMessage('❌ Not yet! Something eats the grass before the frog… try the GRASSHOPPER first.');
     }
   });
 
@@ -495,6 +499,7 @@
       showMessage('🐍 The snake hunts the frog – the food chain continues!');
     } else {
       snakeGroup.setAttribute('visible', false);
+      showMessage('❌ Not yet! Who does the snake hunt? Find the FROG first.');
     }
   });
 
@@ -509,6 +514,7 @@
       showMessage('🦅 The eagle is the top predator – the food chain is complete!');
     } else {
       eagleGroup.setAttribute('visible', false);
+      showMessage('❌ Not yet! The eagle is the TOP predator – climb the chain step by step first.');
     }
   });
 
