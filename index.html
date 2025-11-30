@@ -30,6 +30,7 @@
   <script>
     const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
+    // ----------- TAP / DOUBLE TAP / LONG PRESS -----------
     AFRAME.registerComponent('tap-gestures', {
       schema: {longMs:{default:500}},
       init () {
@@ -50,6 +51,7 @@
       }
     });
 
+    // ----------- DRAG ON PLANE -----------
     AFRAME.registerComponent('drag-on-plane', {
       schema: { plane: {type: 'selector'}, yOffset: {default: 0.25}, radius: {default: 1.2} },
       init () {
@@ -69,7 +71,8 @@
         if (!raycaster || !planeMesh) return;
 
         planeMesh.updateMatrixWorld();
-        const normal = new THREE.Vector3(0,1,0).applyQuaternion(planeMesh.getWorldQuaternion(new THREE.Quaternion()));
+        const normal = new THREE.Vector3(0,1,0)
+            .applyQuaternion(planeMesh.getWorldQuaternion(new THREE.Quaternion()));
         const point  = planeMesh.getWorldPosition(new THREE.Vector3());
         const plane  = new THREE.Plane().setFromNormalAndCoplanarPoint(normal, point);
 
@@ -88,6 +91,7 @@
       }
     });
 
+    // ----------- PINCH TO SCALE -----------
     AFRAME.registerComponent('pinch-scale', {
       schema: {min:{default:0.2}, max:{default:3}},
       init(){
@@ -121,11 +125,13 @@
       }
     });
 
+    // ----------- TWIST ROTATE -----------
     AFRAME.registerComponent('twist-rotate', {
       schema:{degPerRad:{default:57.2958}},
       init(){
         this.active = false; this.startA = 0; this.startRotY = 0;
         const angle = (a,b)=> Math.atan2(b.clientY-a.clientY, b.clientX-a.clientX);
+
         const onStart = (e)=>{
           if (e.touches?.length === 2){
             this.active = true;
@@ -133,6 +139,7 @@
             this.startRotY = this.el.getAttribute('rotation').y;
           }
         };
+
         const onMove = (e)=>{
           if (!this.active || e.touches?.length < 2) return;
           const a = angle(e.touches[0], e.touches[1]);
@@ -140,6 +147,7 @@
           const r = this.el.getAttribute('rotation');
           this.el.setAttribute('rotation', {x:r.x, y:this.startRotY + delta, z:r.z});
         };
+
         const onEnd = ()=> this.active = false;
 
         window.addEventListener('touchstart', onStart, {passive:false});
@@ -149,6 +157,7 @@
       }
     });
 
+    // ----------- SPIN + RANDOM COLOR -----------
     AFRAME.registerComponent('spin-toggle', {
       schema:{speed:{default:4000}},
       init(){
@@ -163,7 +172,7 @@
           }
         });
         this.el.addEventListener('random-color', ()=> {
-          const colors = ['#4CC3D9','#7BC8A4','#FFC65D','#EF2D5E','#FFC65D','#FFFFFF'];
+          const colors = ['#4CC3D9','#7BC8A4','#FFC65D','#EF2D5E','#FFFFFF'];
           const c = colors[Math.floor(Math.random()*colors.length)];
           this.el.setAttribute('material','color',c);
         });
@@ -173,6 +182,26 @@
 </head>
 
 <body>
+
+<!-- 🎉 Congratulations banner -->
+<div id="message" style="
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 20px;
+  background: rgba(0,0,0,0.75);
+  color: white;
+  font-size: 20px;
+  font-weight: 700;
+  border-radius: 10px;
+  display: none;
+  z-index: 20;
+">
+  🎉 Congratulations! You guessed it right!
+</div>
+
+<!-- HUD -->
 <div class="hud" id="hud">
   <button id="btn-rot-l">⟲</button>
   <button id="btn-rot-r">⟳</button>
@@ -192,7 +221,7 @@
   <a-entity light="type: ambient; intensity: 0.8"></a-entity>
   <a-entity light="type: directional; intensity: 0.6" position="0 1 1"></a-entity>
 
-  <!-- 1) GRASS NFT MARKER – first in chain -->
+  <!-- 1) GRASS NFT MARKER -->
   <a-nft
     type="nft"
     url="GRASS"
@@ -215,10 +244,9 @@
            pinch-scale twist-rotate>
     </a-box>
 
-    <a-cylinder radius="0.01" height="0.001" color="#888"></a-cylinder>
   </a-nft>
 
-  <!-- 2) GRASSHOPPER NFT MARKER – unlocked only after GRASS seen -->
+  <!-- 2) GRASSHOPPER NFT MARKER -->
   <a-nft
     type="nft"
     url="GRASSHOPPER"
@@ -228,7 +256,6 @@
     smoothTolerance="0.01"
     smoothThreshold="5">
 
-    <!-- wrap in a group so we can hide/show it -->
     <a-entity id="grasshopperGroup">
 
       <a-plane id="dragplaneGrasshopper" class="raytarget"
@@ -244,7 +271,6 @@
              pinch-scale twist-rotate>
       </a-box>
 
-      <a-cylinder radius="0.01" height="0.001" color="#888"></a-cylinder>
     </a-entity>
   </a-nft>
 
@@ -253,11 +279,18 @@
 
 <script>
   const hud  = document.getElementById('hud');
-  const cubeGrass = document.getElementById('cubeGrass');
+  const message = document.getElementById('message');
 
-  // HUD still controls the GRASS cube (step 1)
+  const cubeGrass = document.getElementById('cubeGrass');
+  const grassMarker = document.getElementById('grassMarker');
+
+  const grasshopperMarker = document.getElementById('grasshopperMarker');
+  const grasshopperGroup  = document.getElementById('grasshopperGroup');
+
+  // HUD controls Grass cube
   document.getElementById('btn-rot-l').addEventListener('click', () => nudgeRot(-15));
   document.getElementById('btn-rot-r').addEventListener('click', () => nudgeRot( 15));
+
   function nudgeRot(delta){
     const r = cubeGrass.getAttribute('rotation');
     cubeGrass.setAttribute('rotation', {x:r.x, y:r.y + delta, z:r.z});
@@ -265,6 +298,7 @@
 
   document.getElementById('btn-scale--').addEventListener('click', () => nudgeScale(0.9));
   document.getElementById('btn-scale-+').addEventListener('click', () => nudgeScale(1.1));
+
   function nudgeScale(mult){
     const s = cubeGrass.getAttribute('scale');
     cubeGrass.setAttribute('scale', {
@@ -274,27 +308,34 @@
     });
   }
 
-  document.getElementById('btn-color').addEventListener('click', () => cubeGrass.emit('random-color'));
+  document.getElementById('btn-color').addEventListener('click', () => 
+    cubeGrass.emit('random-color')
+  );
 
   cubeGrass.addEventListener('tap',       () => cubeGrass.emit('toggle-spin'));
   cubeGrass.addEventListener('doubletap', () => cubeGrass.emit('random-color'));
   cubeGrass.addEventListener('longpress', () => hud.classList.toggle('hidden'));
 
-  // --------- UNLOCK LOGIC: must scan GRASS before GRASSHOPPER shows ---------
-  const grassMarker = document.getElementById('grassMarker');
-  const grasshopperMarker = document.getElementById('grasshopperMarker');
-  const grasshopperGroup = document.getElementById('grasshopperGroup');
-
+  // ----------------- UNLOCK LOGIC + MESSAGE -----------------
   let grassSeen = false;
   grasshopperGroup.setAttribute('visible', false);
 
   grassMarker.addEventListener('markerFound', () => {
-    grassSeen = true;              // unlock next step of food chain
+    grassSeen = true;
   });
 
   grasshopperMarker.addEventListener('markerFound', () => {
     if (grassSeen) {
       grasshopperGroup.setAttribute('visible', true);
+
+      // SHOW MESSAGE
+      message.style.display = 'block';
+
+      // HIDE AFTER 3 SECONDS
+      setTimeout(() => {
+        message.style.display = 'none';
+      }, 3000);
+
     } else {
       grasshopperGroup.setAttribute('visible', false);
     }
@@ -304,5 +345,6 @@
     grasshopperGroup.setAttribute('visible', false);
   });
 </script>
+
 </body>
 </html>
